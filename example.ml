@@ -1,18 +1,13 @@
 open Tree
 open Olt_stream (* or. open Olt_tree for non-streamized version *)
 
-(* auxiliary function for making an input stream from a bare tree *)
-let tree_to_stream t : symbol Stream.t = 
-  let rec flatten_tree : tree -> symbol list = 
-    function 
-      | Leaf n -> [LeafS n]
-      | Node (t1,t2) -> NodeS :: List.append (flatten_tree t1) (flatten_tree t2)
-  in Stream.of_list (flatten_tree t)
-
 (* make an input stream *)
-let make () = 
-  tree_to_stream (* remove this line for Olt_tree case *)
+let tree () = 
+  to_stream
     (Node(Node(Leaf 1,Node(Leaf 2,Leaf 3)),Node(Node(Leaf 4,Leaf 5),Leaf 6)))
+
+
+let print_symbols symbols = print_tree (rebuild_tree symbols)
 
 
 (* map *)
@@ -22,7 +17,7 @@ let rec tree_map : 'p. (int->int) -> ((itree,'p) cons, 'p, otree, unit) monad = 
     ~node:(fun () -> node_make ~left:(tree_map f) ~right:(tree_map f))
 ;;
 
-print_tree (run_tree (make ()) (tree_map (fun x -> x+1)));;
+print_symbols (run_tree (tree ()) (tree_map (fun x -> x+1)));;
 print_newline();;
 (*
   Node (Node (Leaf 2, Node (Leaf 3, Leaf 4)), Node (Node (Leaf 5, Leaf 6), Leaf 7))
@@ -41,7 +36,7 @@ let rec inc_alt : 'p. unit -> ((itree, 'p) cons, 'p, otree, unit) monad = fun ()
     ~node:(fun () -> node_make (inc_alt_even ()) (inc_alt_even ()))
 ;;
 
-print_tree (run_tree (make ()) (inc_alt ()));;
+print_symbols (run_tree (tree ()) (inc_alt ()));;
 print_newline();;
 (*
   Node (Node (Leaf 1, Node (Leaf 3, Leaf 4)), Node (Node (Leaf 5, Leaf 6), Leaf 6))
@@ -55,7 +50,7 @@ let rec sum : 'p. unit -> ((itree,'p)cons,'p,none,int) monad = fun () ->
     ~node:(fun () -> sum () >>= fun x -> sum () >>= fun y -> ret (x+y))
 ;;
 
-print_int (run (make ()) (sum ()));;
+print_int (run (tree ()) (sum ()));;
 print_newline();;
 (*
   21
@@ -90,13 +85,13 @@ let sum2 () =
     ()
 ;;
 
-print_tree (run_tree (make ()) (tree_map2 (fun x -> x+1)));;
+print_symbols (run_tree (tree ()) (tree_map2 (fun x -> x+1)));;
 print_newline();;
 (*
   Node (Node (Leaf 2, Node (Leaf 3, Leaf 4)), Node (Node (Leaf 5, Leaf 6), Leaf 7))
 *)
 
-print_int (run (make ()) (sum2 ()));;
+print_int (run (tree ()) (sum2 ()));;
 print_newline();;
 (*
   21

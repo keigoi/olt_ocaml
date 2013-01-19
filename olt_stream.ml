@@ -12,7 +12,7 @@ let (>>=) f g = fun s -> g (snd (f s)) s
 let (>>) f g = f >>= (fun _ -> g)
 
 type itree = symbol Stream.t
-type otree = tree
+type otree = (symbol -> unit) -> unit
 
 let run t f = snd (f t)
 let run_tree t f = fst (f t)
@@ -25,6 +25,6 @@ let tree_case ~leaf ~node = fun s ->
 let node_make ~left ~right = fun s ->
   let t1,_ = left s in
   let t2,_ = right s in
-  Node(t1,t2),()
+  (fun write -> write NodeS; t1 write; t2 write),()
 
-let leaf_make n = fun s -> Leaf n, ()
+let leaf_make n = fun s -> (fun write -> write (LeafS n)), ()
