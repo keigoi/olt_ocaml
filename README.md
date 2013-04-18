@@ -17,7 +17,7 @@ Build
 Files
 -----
 
-* tree.ml[i]: An definition of trees
+* tree.ml[i]: Definition of trees
 * oLT.mli: The signature shared by multiple OLT implementations.
 * olt_stream.ml[i]: An OLT implementaton which takes a stream of tree nodes as input, and a tree as output.
 * example.ml: Examples
